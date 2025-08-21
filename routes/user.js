@@ -1,4 +1,4 @@
-import { Router } from "express";
+const { Router } = require("express");
 
 const UserRouter = Router();
 
@@ -10,10 +10,9 @@ UserRouter.post("/signup", function (req, res) {
 
 UserRouter.post("/login", function (req, res) {
   res.json({
-    msg: "signup endpoint",
+    msg: "login endpoint",
   });
 });
-
 
 UserRouter.get("/purchases", function (req, res) {
   res.json({
@@ -21,4 +20,4 @@ UserRouter.get("/purchases", function (req, res) {
   });
 });
 
-export default UserRouter;
+module.exports={ UserRouter: UserRouter };

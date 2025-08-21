@@ -3,18 +3,18 @@ const { Router } = require("express");
 
 const CourseRouter = Router();
 
-CourseRouter.get("/courses", function (req, res) {
+CourseRouter.get("/preview", function (req, res) {
   res.json({
     msg: "signup endpoint",
   });
 });
 
-CourseRouter.post("/course/purchase", function (req, res) {
+CourseRouter.post("/purchase", function (req, res) {
   res.json({
     msg: "signup endpoint",
   });
 });
 
-module.exports({
-    CourseRouter:CourseRouter
-})
+module.exports = {
+  CourseRouter: CourseRouter,
+};
