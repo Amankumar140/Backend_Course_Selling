@@ -1,22 +1,8 @@
 const mongoose = require("mongoose");
-require("dotenv").config();
+
 const { Schema } = mongoose;
 
-const mongoURL = process.env.MongoDB_URL;
 
-// Connect to the database
-mongoose
-  .connect(mongoURL, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    // Other options...
-  })
-  .then(() => {
-    console.log("MongoDB connected successfully");
-  })
-  .catch((err) => {
-    console.error("MongoDB connection error:", err);
-  });
 
 // Your Mongoose models and schemas would go here
 
