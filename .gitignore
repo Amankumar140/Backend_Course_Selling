@@ -1,2 +1,4 @@
 node_modules/
 MYReadme.txt
+# Ignore environment variable files
+.env

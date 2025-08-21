@@ -1,7 +1,7 @@
 const { Router } = require("express");
 
 const adminRouter = Router();
-
+const {adminModel}=require("../Schema/Schema")
 //adminRouter.use();
 
 adminRouter.post("/signup", function (req, res) {
