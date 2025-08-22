@@ -1,13 +1,16 @@
 const { Router } = require("express");
-
+require("dotenv").config();
 const adminRouter = Router();
-const { adminModel } = require("../Schema/Schema");
-const { z } = require("zod");
+const { adminModel, courseModel } = require("../Schema/Schema");
+const { z, email } = require("zod");
 const bcrypt = require("bcrypt");
+const jwt=require("jsonwebtoken")
+const JWT_ADMIN_PASS = process.env.JWT_ADMIN_PASS;
 
+// ************************************************************************************************************************
 //adminRouter.use();
 
-adminRouter.post("/signup", function (req, res) {
+adminRouter.post("/signup", async function (req, res) {
   const requiredBody = z.object({
     email: z.string().email(),
     password: z.string().max(10).min(6),
@@ -21,29 +24,95 @@ adminRouter.post("/signup", function (req, res) {
       msg: "invalid input",
       error: validateData.error.issues,
     });
+    return;
   }
 
-  const { email , password ,firstName, secondName}=validateData.data
-
+  const { email, password, firstName, secondName } = validateData.data;
 
   // bcrypt
-
-  const hashPassword=bcrypt.hash(password,5);
-
+  try {
+    const hashPassword = await bcrypt.hash(password, 5);
+    await adminModel.create({
+      email: email,
+      password: hashPassword,
+      firstName: firstName,
+      secondName: secondName,
+    });
+  } catch (e) {
+    res.json({
+      error: e,
+    });
+  }
   res.json({
-    msg: "signup endpoint",
+    msg: " admin signup",
   });
 });
 
-adminRouter.post("/login", function (req, res) {
-  res.json({
-    msg: "login endpoint",
+// $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+adminRouter.post("/login", async function (req, res) {
+  requiredBody = z.object({
+    email: z.string().email(),
+    password: z.string(),
   });
+
+  const validateData = requiredBody.safeParse(req.body);
+  if (!validateData.success) {
+    res.status(403).json({
+      msg: validateData.error.issues,
+    });
+    return;
+  }
+
+  const { email, password } = validateData.data;
+
+  const admin = await adminModel.findOne({
+    email: email,
+  });
+
+  if (!admin) {
+    res.json({
+      msg: "user not found",
+    });
+  }
+
+  const passwordMatch = await bcrypt.compare(password, admin.password);
+
+  if (passwordMatch) {
+    const token = jwt.sign(
+      {
+        id: admin._id,
+      },
+      JWT_ADMIN_PASS
+    );
+    res.json({
+      token: token,
+    });
+  } else {
+    res.json({
+      msg: "incorrect credentials",
+    });
+  }
 });
 
-adminRouter.post("/create-Course", function (req, res) {
+// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+// create-course
+adminRouter.post("/create-Course", async function (req, res) { 
+  const {title, description, imageUrl, price}=req.body;
+
+  const Course=await courseModel.create({
+    title:title,
+    description:description,
+    imageUrl:imageUrl,
+    price:price
+  })
+
+   
+
+
   res.json({
-    msg: "login endpoint",
+    msg: "course-create",
+    courseId:Course._id
   });
 });
 
