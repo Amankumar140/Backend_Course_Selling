@@ -2,10 +2,11 @@ const { Router, response } = require("express");
 const { z } = require("zod");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const { userModel, purchaseModel } = require("../Schema/Schema");
+const { userModel, purchaseModel, courseModel } = require("../Schema/Schema");
 const UserRouter = Router();
 const { JWT_USER_PASS } = require("../config");
-const { userMiddleware } = require("../middleware/user");
+const { userMiddleWare } = require("../middleware/user");
+const mongoose = require("mongoose");
 
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
 
@@ -97,17 +98,24 @@ UserRouter.post("/login", async function (req, res) {
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-UserRouter.get("/purchase", userMiddleware, async function (req, res) {
+UserRouter.get("/purchase", userMiddleWare, async function (req, res) {
   const userId = req.userId;
 
   const purchases = await purchaseModel.find({
     userId,
   });
-  res.json({
-    purchases,
+
+  const courseData = await courseModel.find({
+    _id: { $in: purchases.map(x => x.courseId) },
   });
 
-  
+  res.json({
+    purchases,
+    courseData
+  });
+
+   
 });
+
 
 module.exports = { UserRouter: UserRouter };
