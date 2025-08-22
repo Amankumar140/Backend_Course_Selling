@@ -2,10 +2,10 @@ const { Router, response } = require("express");
 const { z } = require("zod");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const { userModel } = require("../Schema/Schema");
+const { userModel, purchaseModel } = require("../Schema/Schema");
 const UserRouter = Router();
-const {JWT_USER_PASS}=require("../config")
-
+const { JWT_USER_PASS } = require("../config");
+const { userMiddleware } = require("../middleware/user");
 
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
 
@@ -58,7 +58,7 @@ UserRouter.post("/login", async function (req, res) {
     res.status(403).json({
       error: validateData.error.issues,
     });
-    return 
+    return;
   }
   const { email, password } = validateData.data;
 
@@ -70,7 +70,7 @@ UserRouter.post("/login", async function (req, res) {
     res.json({
       msg: "user not found",
     });
-    return 
+    return;
   }
 
   const passwordMatch = await bcrypt.compare(password, response.password);
@@ -95,15 +95,19 @@ UserRouter.post("/login", async function (req, res) {
   }
 });
 
-
-
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+UserRouter.get("/purchase", userMiddleware, async function (req, res) {
+  const userId = req.userId;
 
-UserRouter.get("/purchases", function (req, res) {
-  res.json({
-    msg: "signup endpoint",
+  const purchases = await purchaseModel.find({
+    userId,
   });
+  res.json({
+    purchases,
+  });
+
+  
 });
 
 module.exports = { UserRouter: UserRouter };
