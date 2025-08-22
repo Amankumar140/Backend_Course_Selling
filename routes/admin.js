@@ -103,7 +103,6 @@ adminRouter.post("/create-Course", adminMiddleWare, async function (req, res) {
   const adminId = req.adminId;
 
   const { title, description, imageUrl, price } = req.body;
-  
 
   // saas video in 6 where pipelining for images
   const Course = await courseModel.create({
@@ -123,16 +122,64 @@ adminRouter.post("/create-Course", adminMiddleWare, async function (req, res) {
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 // put courses or update
-adminRouter.put("/put-course", function (req, res) {
-  res.json({
-    msg: "login endpoint",
-  });
+adminRouter.put("/put-course", adminMiddleWare, async function (req, res) {
+  try {
+    const adminId = req.adminId;
+    const { title, description, imageUrl, price, courseId } = req.body;
+
+    // check first that is the courseId is belongs to the same createID or not
+
+    // updateOne works on what basis its update,
+
+    const course = await courseModel.updateOne(
+      {
+        _id: courseId,
+        creatorId: adminId, // for verification
+      },
+      {
+        title: title,
+        description: description,
+        imageUrl: imageUrl,
+        price: price,
+      }
+    );
+    if (course.matchedCount === 0) {
+      return res.status(404).json({
+        msg: "Course not found or not owned by this admin",
+      });
+    }
+
+    res.json({
+      msg: "Course updated successfully",
+    });
+  } catch (err) {
+    res.status(500).json({
+      msg: "Internal server error",
+      error: err.message,
+    });
+  }
 });
 
-adminRouter.get("/all-course", function (req, res) {
-  res.json({
-    msg: "login endpoint",
+//^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^6
+
+// get all course for admin
+adminRouter.get("/all-course", adminMiddleWare, async function (req, res) {
+  const adminId = req.adminId;
+
+  const courses = await courseModel.find({
+    creatorId: adminId, // for verification
   });
+
+  if (courses) {
+    res.json({
+      msg: "update happens ",
+      courses,
+    });
+  } else {
+    res.status(403).json({
+      msg: "something wrong in id",
+    });
+  }
 });
 
 module.exports = {
