@@ -1,11 +1,12 @@
 const { Router } = require("express");
-require("dotenv").config();
+// require("dotenv").config();
 const adminRouter = Router();
 const { adminModel, courseModel } = require("../Schema/Schema");
 const { z, email } = require("zod");
 const bcrypt = require("bcrypt");
-const jwt=require("jsonwebtoken")
-const JWT_ADMIN_PASS = process.env.JWT_ADMIN_PASS;
+const jwt = require("jsonwebtoken");
+const { JWT_ADMIN_PASS } = require("../config.js");
+const { adminMiddleWare } = require("../middleware/admin.js");
 
 // ************************************************************************************************************************
 //adminRouter.use();
@@ -97,25 +98,31 @@ adminRouter.post("/login", async function (req, res) {
 
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // create-course
-adminRouter.post("/create-Course", async function (req, res) { 
-  const {title, description, imageUrl, price}=req.body;
 
-  const Course=await courseModel.create({
-    title:title,
-    description:description,
-    imageUrl:imageUrl,
-    price:price
-  })
+adminRouter.post("/create-Course", adminMiddleWare, async function (req, res) {
+  const adminId = req.adminId;
 
-   
+  const { title, description, imageUrl, price } = req.body;
+  
 
+  // saas video in 6 where pipelining for images
+  const Course = await courseModel.create({
+    title: title,
+    description: description,
+    imageUrl: imageUrl,
+    price: price,
+    creatorId: adminId,
+  });
 
   res.json({
     msg: "course-create",
-    courseId:Course._id
+    courseId: Course._id,
   });
 });
 
+// @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+// put courses or update
 adminRouter.put("/put-course", function (req, res) {
   res.json({
     msg: "login endpoint",

@@ -4,8 +4,8 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const { userModel } = require("../Schema/Schema");
 const UserRouter = Router();
-require("dotenv").config();
-const JWT_USER_PASS = process.env.JWT_USER_PASS;
+const {JWT_USER_PASS}=require("../config")
+
 
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
 
